@@ -1,0 +1,16 @@
+aws_profile = "persona3"
+aws_region  = "us-east-1"
+az          = "us-east-1a"
+resource_suffix = "mpg"
+
+admin_email = "tuemail@example.com"
+allowed_admin_cidr = "203.0.113.10/32"
+
+instance_type = "t3.micro"
+ami_id        = "ami-052064a798f08f0d3"
+key_name      = ""
+
+threshold_total   = 20
+threshold_per_ip  = 10
+s3_log_expire_days = 30
+enable_ssm         = true

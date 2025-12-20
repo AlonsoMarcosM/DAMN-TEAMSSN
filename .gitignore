@@ -1,0 +1,22 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# AWS credentials
+.aws/
+credentials*
+
+# tfvars (real)
+envs/*.tfvars
+!envs/*.tfvars.example
+!envs/aws_credentials.example
+
+# Build artifacts
+build/
+*.zip
+
+# Env files
+.env*
