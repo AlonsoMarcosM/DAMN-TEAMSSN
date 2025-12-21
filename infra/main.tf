@@ -6,7 +6,7 @@ data "aws_ami" "al2023" {
 
   filter {
     name   = "name"
-    values = ["al2023-ami-2023.*-x86_64"]
+    values = ["al2023-ami-2023.*-kernel-6.1-x86_64"]
   }
 
   filter {
@@ -19,6 +19,8 @@ data "aws_ami" "al2023" {
     values = ["hvm"]
   }
 }
+
+data "aws_caller_identity" "current" {}
 
 locals {
   project_prefix  = "proy-damn-teamssn"
@@ -34,7 +36,7 @@ locals {
     Env     = local.env
   }
 
-  s3_bucket_name   = "${local.project_prefix}-logs-${local.resource_suffix}"
+  s3_bucket_name   = "${local.project_prefix}-logs-${local.resource_suffix}-${data.aws_caller_identity.current.account_id}"
   sns_topic_name   = "${local.project_prefix}-alerts-${local.resource_suffix}"
   lambda_name      = "${local.project_prefix}-analyzer-${local.resource_suffix}"
   effective_ami_id = var.ami_id != "" ? var.ami_id : data.aws_ami.al2023.id
@@ -80,6 +82,7 @@ module "lambda_analyzer" {
   sns_topic_arn    = module.sns_notifications.topic_arn
   threshold_total  = var.threshold_total
   threshold_per_ip = var.threshold_per_ip
+  existing_role_arn = var.existing_lambda_role_arn
   tags             = local.tags
 }
 
@@ -96,6 +99,7 @@ module "honeypot_ec2" {
   ami_id             = local.effective_ami_id
   key_name           = var.key_name
   enable_ssm         = var.enable_ssm
+  existing_instance_profile_name = var.existing_instance_profile_name
   aws_region         = var.aws_region
   s3_bucket_name     = module.s3_logs.bucket_name
   tags               = local.tags

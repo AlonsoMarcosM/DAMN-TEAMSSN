@@ -40,13 +40,25 @@ variable "instance_type" {
 
 variable "ami_id" {
   type        = string
-  description = "AMI ID for the honeypot instance. Leave empty to use latest Amazon Linux 2023."
-  default     = "ami-052064a798f08f0d3"
+  description = "AMI ID for the honeypot instance. Leave empty to use latest Amazon Linux 2023 kernel 6.1."
+  default     = ""
 }
 
 variable "key_name" {
   type        = string
   description = "Optional SSH key pair name."
+  default     = ""
+}
+
+variable "existing_instance_profile_name" {
+  type        = string
+  description = "Existing IAM instance profile name to attach to EC2. Leave empty to create a new role/profile."
+  default     = ""
+}
+
+variable "existing_lambda_role_arn" {
+  type        = string
+  description = "Existing IAM role ARN for Lambda. Leave empty to create a new role."
   default     = ""
 }
 

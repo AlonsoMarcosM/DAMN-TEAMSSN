@@ -10,7 +10,7 @@ crash.*.log
 credentials*
 
 # tfvars (real)
-envs/*.tfvars
+#envs/*.tfvars
 !envs/*.tfvars.example
 !envs/aws_credentials.example
 

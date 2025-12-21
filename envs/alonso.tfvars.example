@@ -3,12 +3,15 @@ aws_region  = "us-east-1"
 az          = "us-east-1a"
 resource_suffix = "amm"
 
-admin_email = "tuemail@example.com"
+admin_email = "alonso.marcos@alu.uclm.es"
 allowed_admin_cidr = "203.0.113.10/32"
 
 instance_type = "t3.micro"
-ami_id        = "ami-052064a798f08f0d3"
+ami_id        = ""
 key_name      = ""
+
+existing_instance_profile_name = ""
+existing_lambda_role_arn       = ""
 
 threshold_total   = 20
 threshold_per_ip  = 10

@@ -1,6 +1,7 @@
 locals {
   name_prefix = "${var.project_prefix}-${var.resource_suffix}"
   s3_prefix   = "cowrie/${var.resource_suffix}"
+  use_existing_profile = var.existing_instance_profile_name != ""
 }
 
 resource "aws_security_group" "honeypot" {
@@ -53,6 +54,8 @@ resource "aws_security_group" "honeypot" {
 
 # IAM role for EC2 to push logs to S3 (and SSM if enabled)
 data "aws_iam_policy_document" "assume_role" {
+  count = local.use_existing_profile ? 0 : 1
+
   statement {
     actions = ["sts:AssumeRole"]
 
@@ -64,8 +67,9 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 resource "aws_iam_role" "honeypot" {
+  count              = local.use_existing_profile ? 0 : 1
   name               = "${local.name_prefix}-role"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  assume_role_policy = data.aws_iam_policy_document.assume_role[0].json
 
   tags = merge(var.tags, {
     Name = "${local.name_prefix}-role"
@@ -94,20 +98,22 @@ data "aws_iam_policy_document" "s3_logs" {
 }
 
 resource "aws_iam_role_policy" "s3_logs" {
+  count  = local.use_existing_profile ? 0 : 1
   name   = "${local.name_prefix}-s3-logs"
-  role   = aws_iam_role.honeypot.name
+  role   = aws_iam_role.honeypot[0].name
   policy = data.aws_iam_policy_document.s3_logs.json
 }
 
 resource "aws_iam_role_policy_attachment" "ssm" {
-  count      = var.enable_ssm ? 1 : 0
-  role       = aws_iam_role.honeypot.name
+  count      = local.use_existing_profile || !var.enable_ssm ? 0 : 1
+  role       = aws_iam_role.honeypot[0].name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_iam_instance_profile" "honeypot" {
+  count = local.use_existing_profile ? 0 : 1
   name = "${local.name_prefix}-profile"
-  role = aws_iam_role.honeypot.name
+  role = aws_iam_role.honeypot[0].name
 
   tags = merge(var.tags, {
     Name = "${local.name_prefix}-profile"
@@ -120,7 +126,7 @@ resource "aws_instance" "honeypot" {
   subnet_id                   = var.subnet_id
   vpc_security_group_ids      = [aws_security_group.honeypot.id]
   associate_public_ip_address = true
-  iam_instance_profile        = aws_iam_instance_profile.honeypot.name
+  iam_instance_profile        = local.use_existing_profile ? var.existing_instance_profile_name : aws_iam_instance_profile.honeypot[0].name
   key_name                    = var.key_name != "" ? var.key_name : null
   user_data = templatefile("${path.module}/user_data.sh", {
     aws_region      = var.aws_region

@@ -30,6 +30,11 @@ variable "key_name" {
   type = string
 }
 
+variable "existing_instance_profile_name" {
+  type    = string
+  default = ""
+}
+
 variable "enable_ssm" {
   type = bool
 }

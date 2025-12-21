@@ -22,6 +22,11 @@ variable "threshold_per_ip" {
   type = number
 }
 
+variable "existing_role_arn" {
+  type    = string
+  default = ""
+}
+
 variable "tags" {
   type = map(string)
 }
