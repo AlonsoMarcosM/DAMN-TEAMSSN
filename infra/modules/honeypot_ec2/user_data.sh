@@ -9,7 +9,7 @@ ADMIN_SSH_PORT="${admin_ssh_port}"
 
 # Base packages
 sudo dnf update -y
-sudo dnf install -y git python3 python3-pip python3-venv gcc libffi-devel openssl-devel make awscli cronie libcap
+sudo dnf install -y git python3 python3-pip gcc libffi-devel openssl-devel make awscli cronie libcap
 
 # Cowrie user and install
 if ! id cowrie >/dev/null 2>&1; then
