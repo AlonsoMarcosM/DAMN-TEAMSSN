@@ -38,7 +38,11 @@ sudo sed -i 's/^#\s*listen_endpoints/listen_endpoints/' /opt/cowrie/cowrie/etc/c
 sudo sed -i 's/^listen_endpoints.*/listen_endpoints = tcp:22:interface=0.0.0.0/' /opt/cowrie/cowrie/etc/cowrie.cfg
 
 # Allow Cowrie to bind port 22 without running as root
-sudo setcap 'cap_net_bind_service=+ep' /opt/cowrie/cowrie-env/bin/python3
+# Localizar el binario real de python3 al que apunta el venv
+REAL_PYTHON=$(readlink -f /opt/cowrie/cowrie-env/bin/python3)
+
+# Aplicar la capacidad al binario real
+sudo setcap 'cap_net_bind_service=+ep' "$REAL_PYTHON"
 
 # Systemd service
 cat <<'SERVICE' | sudo tee /etc/systemd/system/cowrie.service >/dev/null
