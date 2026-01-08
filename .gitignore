@@ -1,5 +1,7 @@
 # Terraform
 .terraform/
+/.tmp/
+/scripts/ssm_*.json
 *.tfstate
 *.tfstate.*
 crash.log

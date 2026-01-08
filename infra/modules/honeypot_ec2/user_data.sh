@@ -9,7 +9,13 @@ ADMIN_SSH_PORT="${admin_ssh_port}"
 
 # Base packages
 sudo dnf update -y
-sudo dnf install -y git python3 python3-pip gcc libffi-devel openssl-devel make awscli cronie libcap
+sudo dnf install -y git python3.11 python3.11-pip gcc libffi-devel openssl-devel make awscli cronie libcap
+
+PYTHON_BIN="$(command -v python3.11 || true)"
+if [ -z "$PYTHON_BIN" ]; then
+  echo "python3.11 not found; Cowrie requires a supported Python version." >&2
+  exit 1
+fi
 
 # Cowrie user and install
 if ! id cowrie >/dev/null 2>&1; then
@@ -24,18 +30,42 @@ if [ ! -d /opt/cowrie/cowrie ]; then
 fi
 
 if [ ! -d /opt/cowrie/cowrie-env ]; then
-  sudo -u cowrie python3 -m venv /opt/cowrie/cowrie-env
+  sudo -u cowrie "$PYTHON_BIN" -m venv /opt/cowrie/cowrie-env
 fi
 
 sudo -u cowrie /opt/cowrie/cowrie-env/bin/pip install --upgrade pip
 sudo -u cowrie /opt/cowrie/cowrie-env/bin/pip install --upgrade -r /opt/cowrie/cowrie/requirements.txt
+# Install Cowrie entrypoint into the venv so the "cowrie" script exists.
+sudo -u cowrie /opt/cowrie/cowrie-env/bin/pip install -e /opt/cowrie/cowrie
 
 if [ ! -f /opt/cowrie/cowrie/etc/cowrie.cfg ]; then
   sudo -u cowrie cp /opt/cowrie/cowrie/etc/cowrie.cfg.dist /opt/cowrie/cowrie/etc/cowrie.cfg
 fi
 
-sudo sed -i 's/^#\s*listen_endpoints/listen_endpoints/' /opt/cowrie/cowrie/etc/cowrie.cfg
-sudo sed -i 's/^listen_endpoints.*/listen_endpoints = tcp:22:interface=0.0.0.0/' /opt/cowrie/cowrie/etc/cowrie.cfg
+sudo awk '
+BEGIN{added=0}
+{
+  if ($0 ~ /^\[ssh\]/) {
+    print
+    if (!added) {
+      print "listen_endpoints = tcp:22:interface=0.0.0.0"
+      added=1
+    }
+    next
+  }
+  if ($0 ~ /^[[:space:]]*listen_endpoints[[:space:]]*=/) next
+  print
+}
+END{
+  if (!added) {
+    print ""
+    print "[ssh]"
+    print "listen_endpoints = tcp:22:interface=0.0.0.0"
+  }
+}
+' /opt/cowrie/cowrie/etc/cowrie.cfg > /tmp/cowrie.cfg
+sudo mv /tmp/cowrie.cfg /opt/cowrie/cowrie/etc/cowrie.cfg
+sudo chown cowrie:cowrie /opt/cowrie/cowrie/etc/cowrie.cfg
 
 # Allow Cowrie to bind port 22 without running as root
 # Localizar el binario real de python3 al que apunta el venv
@@ -56,7 +86,8 @@ User=cowrie
 Group=cowrie
 WorkingDirectory=/opt/cowrie/cowrie
 Environment="PATH=/opt/cowrie/cowrie-env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-ExecStart=/opt/cowrie/cowrie/bin/cowrie start -n
+Environment="PYTHONPATH=/opt/cowrie/cowrie/src"
+ExecStart=/opt/cowrie/cowrie-env/bin/twistd --umask 0022 --nodaemon --pidfile= -l - cowrie
 Restart=always
 RestartSec=5
 
@@ -84,10 +115,10 @@ fi
 sudo systemctl enable --now cowrie
 
 # S3 log sync script
+LOG_DIR="/opt/cowrie/cowrie/var/log/cowrie"
 cat <<EOF | sudo tee /usr/local/bin/cowrie_s3_sync.sh >/dev/null
 #!/bin/bash
 set -euo pipefail
-LOG_DIR="/opt/cowrie/cowrie/var/log/cowrie"
 if [ ! -d "$LOG_DIR" ]; then
   exit 0
 fi

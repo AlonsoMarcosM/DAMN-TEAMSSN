@@ -1,3 +1,6 @@
+// S3 logs module: bucket + security + lifecycle.
+
+// Logs bucket (force_destroy for lab cleanup).
 resource "aws_s3_bucket" "logs" {
   bucket        = var.bucket_name
   force_destroy = true
@@ -7,6 +10,7 @@ resource "aws_s3_bucket" "logs" {
   })
 }
 
+// Block public access.
 resource "aws_s3_bucket_public_access_block" "logs" {
   bucket                  = aws_s3_bucket.logs.id
   block_public_acls       = true
@@ -15,6 +19,7 @@ resource "aws_s3_bucket_public_access_block" "logs" {
   restrict_public_buckets = true
 }
 
+// Enable SSE-S3 encryption by default.
 resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
   bucket = aws_s3_bucket.logs.id
 
@@ -25,6 +30,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
   }
 }
 
+// Auto-expire old logs.
 resource "aws_s3_bucket_lifecycle_configuration" "logs" {
   bucket = aws_s3_bucket.logs.id
 

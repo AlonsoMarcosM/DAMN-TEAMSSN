@@ -1,9 +1,9 @@
 aws_profile = "alonso"
 aws_region  = "us-east-1"
 az          = "us-east-1a"
-resource_suffix = "amm"
+resource_suffix = "amm2"
 
-admin_email = "alonso.marcos@alu.uclm.es"
+admin_email = "alonseitor10@gmail.com"
 allowed_admin_cidr = "203.0.113.10/32"
 
 instance_type = "t3.micro"

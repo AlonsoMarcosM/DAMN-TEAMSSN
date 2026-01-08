@@ -9,3 +9,4 @@ variable "expire_days" {
 variable "tags" {
   type = map(string)
 }
+// Variables for the S3 logs module.

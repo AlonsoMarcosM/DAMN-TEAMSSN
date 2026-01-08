@@ -1,13 +1,18 @@
+// Lambda analyzer module: package code, IAM role, function, and S3 trigger.
+
+// Package Lambda source into a zip.
 data "archive_file" "lambda_zip" {
   type        = "zip"
   source_dir  = "${path.root}/../src/lambda/analyzer"
   output_path = "${path.root}/../build/lambda_analyzer.zip"
 }
 
+// Use existing IAM role when provided.
 locals {
   use_existing_role = var.existing_role_arn != ""
 }
 
+// IAM assume role policy for Lambda.
 data "aws_iam_policy_document" "assume_role" {
   count = local.use_existing_role ? 0 : 1
 
@@ -21,6 +26,7 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
+// IAM role for Lambda (optional if using existing role).
 resource "aws_iam_role" "lambda" {
   count              = local.use_existing_role ? 0 : 1
   name               = "${var.function_name}-role"
@@ -31,6 +37,7 @@ resource "aws_iam_role" "lambda" {
   })
 }
 
+// Inline policy: read S3 logs, write CloudWatch Logs, publish SNS.
 data "aws_iam_policy_document" "lambda_policy" {
   statement {
     actions = ["s3:GetObject", "s3:GetObjectVersion"]
@@ -54,6 +61,7 @@ data "aws_iam_policy_document" "lambda_policy" {
   }
 }
 
+// Attach the inline policy to the role.
 resource "aws_iam_role_policy" "lambda_policy" {
   count  = local.use_existing_role ? 0 : 1
   name   = "${var.function_name}-policy"
@@ -61,6 +69,7 @@ resource "aws_iam_role_policy" "lambda_policy" {
   policy = data.aws_iam_policy_document.lambda_policy.json
 }
 
+// Lambda function that processes Cowrie logs.
 resource "aws_lambda_function" "analyzer" {
   function_name    = var.function_name
   description      = "Analyze Cowrie logs from S3 and send SNS alerts"
@@ -85,6 +94,7 @@ resource "aws_lambda_function" "analyzer" {
   })
 }
 
+// Allow S3 to invoke the Lambda.
 resource "aws_lambda_permission" "allow_s3" {
   statement_id  = "AllowExecutionFromS3"
   action        = "lambda:InvokeFunction"
@@ -93,6 +103,7 @@ resource "aws_lambda_permission" "allow_s3" {
   source_arn    = var.s3_bucket_arn
 }
 
+// Trigger Lambda on new objects under cowrie/ prefix.
 resource "aws_s3_bucket_notification" "s3_trigger" {
   bucket = var.s3_bucket_name
 

@@ -9,3 +9,4 @@ variable "admin_email" {
 variable "tags" {
   type = map(string)
 }
+// Variables for the SNS module.

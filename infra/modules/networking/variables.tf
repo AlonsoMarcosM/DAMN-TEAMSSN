@@ -21,3 +21,4 @@ variable "az" {
 variable "tags" {
   type = map(string)
 }
+// Variables for the networking module.

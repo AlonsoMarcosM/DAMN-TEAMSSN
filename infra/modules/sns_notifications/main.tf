@@ -1,3 +1,6 @@
+// SNS notifications module: topic + email subscription.
+
+// Topic for alerts.
 resource "aws_sns_topic" "alerts" {
   name = var.topic_name
 
@@ -6,6 +9,7 @@ resource "aws_sns_topic" "alerts" {
   })
 }
 
+// Email subscription (needs confirmation).
 resource "aws_sns_topic_subscription" "email" {
   topic_arn = aws_sns_topic.alerts.arn
   protocol  = "email"

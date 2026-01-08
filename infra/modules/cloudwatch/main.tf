@@ -1,3 +1,4 @@
+// CloudWatch alarm for EC2 status check failures.
 resource "aws_cloudwatch_metric_alarm" "status_check_failed" {
   alarm_name          = "${var.instance_id}-status-check-failed"
   alarm_description   = "EC2 status check failed"
@@ -20,6 +21,7 @@ resource "aws_cloudwatch_metric_alarm" "status_check_failed" {
   tags = var.tags
 }
 
+// CloudWatch alarm for high CPU utilization.
 resource "aws_cloudwatch_metric_alarm" "cpu_high" {
   alarm_name          = "${var.instance_id}-cpu-high"
   alarm_description   = "High CPU utilization"

@@ -1,9 +1,12 @@
+// Honeypot EC2 module: security group, IAM, instance, and EIP.
+
 locals {
   name_prefix = "${var.project_prefix}-${var.resource_suffix}"
   s3_prefix   = "cowrie/${var.resource_suffix}"
   use_existing_profile = var.existing_instance_profile_name != ""
 }
 
+// Security group for the honeypot.
 resource "aws_security_group" "honeypot" {
   name        = "${local.name_prefix}-sg"
   description = "Honeypot security group"
@@ -52,7 +55,7 @@ resource "aws_security_group" "honeypot" {
   })
 }
 
-# IAM role for EC2 to push logs to S3 (and SSM if enabled)
+// IAM role for EC2 to push logs to S3 (and SSM if enabled).
 data "aws_iam_policy_document" "assume_role" {
   count = local.use_existing_profile ? 0 : 1
 
@@ -66,6 +69,7 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
+// EC2 role (created only if no existing profile is provided).
 resource "aws_iam_role" "honeypot" {
   count              = local.use_existing_profile ? 0 : 1
   name               = "${local.name_prefix}-role"
@@ -76,6 +80,7 @@ resource "aws_iam_role" "honeypot" {
   })
 }
 
+// Policy: allow EC2 to write logs to S3.
 data "aws_iam_policy_document" "s3_logs" {
   statement {
     actions = [
@@ -97,6 +102,7 @@ data "aws_iam_policy_document" "s3_logs" {
   }
 }
 
+// Attach S3 policy to the role.
 resource "aws_iam_role_policy" "s3_logs" {
   count  = local.use_existing_profile ? 0 : 1
   name   = "${local.name_prefix}-s3-logs"
@@ -104,12 +110,14 @@ resource "aws_iam_role_policy" "s3_logs" {
   policy = data.aws_iam_policy_document.s3_logs.json
 }
 
+// Attach SSM policy when SSM is enabled.
 resource "aws_iam_role_policy_attachment" "ssm" {
   count      = local.use_existing_profile || !var.enable_ssm ? 0 : 1
   role       = aws_iam_role.honeypot[0].name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+// Instance profile for EC2 (optional if using existing profile).
 resource "aws_iam_instance_profile" "honeypot" {
   count = local.use_existing_profile ? 0 : 1
   name = "${local.name_prefix}-profile"
@@ -120,6 +128,7 @@ resource "aws_iam_instance_profile" "honeypot" {
   })
 }
 
+// EC2 instance running Cowrie via user_data.
 resource "aws_instance" "honeypot" {
   ami                         = var.ami_id
   instance_type               = var.instance_type
@@ -141,6 +150,7 @@ resource "aws_instance" "honeypot" {
   })
 }
 
+// Elastic IP to keep a stable public IP.
 resource "aws_eip" "honeypot" {
   domain   = "vpc"
   instance = aws_instance.honeypot.id

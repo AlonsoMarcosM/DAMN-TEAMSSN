@@ -1,3 +1,4 @@
+// AWS and region settings.
 variable "aws_profile" {
   type        = string
   description = "Optional AWS CLI profile. Leave empty to use default."
@@ -16,6 +17,7 @@ variable "az" {
   default     = "us-east-1a"
 }
 
+// Naming and notifications.
 variable "resource_suffix" {
   type        = string
   description = "Unique suffix per student (amm, nlr, mpg, dtm)."
@@ -26,6 +28,7 @@ variable "admin_email" {
   description = "Admin email address for SNS notifications."
 }
 
+// Access and instance configuration.
 variable "allowed_admin_cidr" {
   type        = string
   description = "CIDR allowed for admin SSH if SSM is disabled."
@@ -50,6 +53,7 @@ variable "key_name" {
   default     = ""
 }
 
+// IAM reuse (for restricted lab accounts).
 variable "existing_instance_profile_name" {
   type        = string
   description = "Existing IAM instance profile name to attach to EC2. Leave empty to create a new role/profile."
@@ -62,6 +66,7 @@ variable "existing_lambda_role_arn" {
   default     = ""
 }
 
+// Alert thresholds and log retention.
 variable "threshold_total" {
   type        = number
   description = "Total events threshold for alerting."
@@ -80,6 +85,7 @@ variable "s3_log_expire_days" {
   default     = 30
 }
 
+// Admin access preference.
 variable "enable_ssm" {
   type        = bool
   description = "Enable SSM access and disable SSH daemon."

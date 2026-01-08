@@ -60,3 +60,4 @@ variable "enable_telnet" {
   type    = bool
   default = false
 }
+// Variables for the honeypot EC2 module.

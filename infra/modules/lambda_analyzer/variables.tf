@@ -30,3 +30,4 @@ variable "existing_role_arn" {
 variable "tags" {
   type = map(string)
 }
+// Variables for the Lambda analyzer module.

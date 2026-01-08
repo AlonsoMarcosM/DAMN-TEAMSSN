@@ -1,5 +1,6 @@
-# Shared locals and defaults
+# Shared locals and defaults for the whole stack.
 
+// Latest Amazon Linux 2023 AMI (used when ami_id is empty).
 data "aws_ami" "al2023" {
   most_recent = true
   owners      = ["amazon"]
@@ -20,8 +21,10 @@ data "aws_ami" "al2023" {
   }
 }
 
+// Current AWS account id (used for unique bucket names).
 data "aws_caller_identity" "current" {}
 
+// Project-wide settings and derived names.
 locals {
   project_prefix  = "proy-damn-teamssn"
   team_name       = "DAMN-TEAMSSN"
@@ -42,7 +45,7 @@ locals {
   effective_ami_id = var.ami_id != "" ? var.ami_id : data.aws_ami.al2023.id
 }
 
-# 1) Networking
+// 1) Networking: VPC + subnet + route + IGW.
 module "networking" {
   source = "./modules/networking"
 
@@ -54,7 +57,7 @@ module "networking" {
   tags            = local.tags
 }
 
-# 2) S3 logs bucket
+// 2) S3 logs bucket for Cowrie outputs.
 module "s3_logs" {
   source = "./modules/s3_logs"
 
@@ -63,7 +66,7 @@ module "s3_logs" {
   tags        = local.tags
 }
 
-# 3) SNS notifications
+// 3) SNS notifications (email alerts).
 module "sns_notifications" {
   source = "./modules/sns_notifications"
 
@@ -72,7 +75,7 @@ module "sns_notifications" {
   tags        = local.tags
 }
 
-# 4) Lambda analyzer
+// 4) Lambda analyzer (process logs and send alerts).
 module "lambda_analyzer" {
   source = "./modules/lambda_analyzer"
 
@@ -86,7 +89,7 @@ module "lambda_analyzer" {
   tags             = local.tags
 }
 
-# 5) Honeypot EC2 (Cowrie)
+// 5) Honeypot EC2 (Cowrie).
 module "honeypot_ec2" {
   source = "./modules/honeypot_ec2"
 
@@ -105,7 +108,7 @@ module "honeypot_ec2" {
   tags               = local.tags
 }
 
-# 6) CloudWatch alarms
+// 6) CloudWatch alarms for EC2 health.
 module "cloudwatch" {
   source = "./modules/cloudwatch"
 
