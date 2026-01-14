@@ -61,4 +61,4 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Wrtite-Host "Ejecutar 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes -o ConnectTimeout=5 -p 22 fakeuser@<ip-publica-ec2>' para hacer un ataque."
+Write-Host "Ejecutar 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes -o ConnectTimeout=5 -p 22 fakeuser@<ip-publica-ec2>' para hacer un ataque."

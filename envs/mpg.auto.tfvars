@@ -1,5 +1,5 @@
 resource_suffix = "mpg"
-admin_email = "mario.panos2@alu.uclm.es"
+admin_email = "mariopg2003@gmail.com"
 aws_region = "us-east-1"
 ami_id = ""
 enable_ssm = true
