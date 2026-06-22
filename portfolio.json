@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "repository": "AlonsoMarcosM/DAMN-TEAMSSN",
+  "repository_url": "https://github.com/AlonsoMarcosM/DAMN-TEAMSSN",
+  "title": {"es": "Honeypot AWS DAMN-TEAMSSN", "en": "DAMN-TEAMSSN AWS Honeypot"},
+  "summary": {
+    "es": "Honeypot Cowrie reproducible con Terraform, análisis serverless y alertas.",
+    "en": "Reproducible Cowrie honeypot with Terraform, serverless analysis and alerts."
+  },
+  "technologies": ["Terraform", "AWS", "Cowrie", "Lambda", "S3", "CloudWatch"],
+  "deployment": {
+    "type": "documentation",
+    "provider": "github-pages",
+    "mode": "static-evidence",
+    "source_branch": "main",
+    "status": "prepared",
+    "url": "https://alonsomarcosm.github.io/DAMN-TEAMSSN/"
+  }
+}
