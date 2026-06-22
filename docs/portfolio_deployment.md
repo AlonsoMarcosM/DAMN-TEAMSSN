@@ -6,4 +6,4 @@ El workflow `.github/workflows/pages.yml` construye el repositorio con Jekyll y 
 
 La infraestructura AWS solo debe levantarse temporalmente en un entorno controlado y destruirse al terminar las pruebas.
 
-Última verificación de configuración: 2026-06-22.
+Última verificación pública: 2026-06-22, respuesta HTTP 200 y workflow completo.
