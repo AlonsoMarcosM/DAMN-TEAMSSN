@@ -22,8 +22,3 @@ build/
 
 # Env files
 .env*
-/AGENTS.md
-/CLAUDE.md
-/.agents/
-/.codex/
-/skills/
